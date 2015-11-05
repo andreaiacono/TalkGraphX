@@ -20,10 +20,10 @@ object GraphXSample {
     val users: RDD[(VertexId, (String, String))] =
       sparkContext.parallelize(
         Array(
-          (1L, ("andrea", "Disbrain")),
-          (2L, ("luca", "BitGold")),
-          (3L, ("pierre", "disbrain")),
-          (4L, ("gian carlo", "JRC")))
+          (1L, ("andrea", "I.")),
+          (2L, ("luca", "M.")),
+          (3L, ("pierre", "F.")),
+          (4L, ("gian carlo", "P.")))
       )
 
     // edges' RDD
@@ -36,14 +36,14 @@ object GraphXSample {
           Edge(4L, 2L, "friend"))
       )
 
-    val defaultUser = ("John Doe", "Missing")
+    val defaultUser = ("John", "D.")
     Graph(users, edges, defaultUser)
   }
 
   def printGraph(graph: Graph[(String, String), String] ): Unit = {
     val facts: RDD[String] =
       graph.triplets.map(triplet =>
-        triplet.srcAttr._1 + " (" + triplet.srcAttr._2 + ") is a " + triplet.attr + " of " + triplet.dstAttr._1 + " (" + triplet.dstAttr._2 + ").")
+        triplet.srcAttr._1 + " " + triplet.srcAttr._2 + " is a " + triplet.attr + " of " + triplet.dstAttr._1 + " " + triplet.dstAttr._2 + "")
     facts.collect.foreach(println(_))
   }
 }
