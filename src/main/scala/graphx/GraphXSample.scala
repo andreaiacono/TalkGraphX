@@ -12,7 +12,10 @@ object GraphXSample {
     val sparkContext = new SparkContext(sparkConf)
 
     val graph = loadGraphFromFile(sparkContext, Constants.EDGES_FILENAME, Constants.VERTICES_FILENAME)
+
+    // uncomment this line to create a hardcoded graph
 //    val graph = createSampleGraph(sparkContext)
+
     printPeopleRelationships(graph)
   }
 

@@ -1,0 +1,21 @@
+graph {
+    fill-color: white;
+}
+node {
+    size: 50;
+    fill-color: grey;
+    text-offset: 0, 0;
+    stroke-mode: plain;
+    stroke-color: darkgrey;
+}
+node:clicked {
+    fill-color: #2277FF;
+    size: 75;
+    text-size:18;
+    text-offset: 0, 0;
+}
+edge {
+    text-visibility-mode: under-zoom;
+    text-visibility: 0.7;
+    text-alignment: along;
+}
