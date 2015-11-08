@@ -22,14 +22,14 @@ object ShortestPathSample {
     run(graph)
   }
 
-  def run(graph: Graph[String, String]): Unit = {
+  def run(graph: Graph[(String, Int), String]): Unit = {
 
     // calls the GraphX shortest path algorithm on the graph for nodes 1 and 5 (so we have
     // the shortest path between these two nodes and all the other nodes of the graph)
-    val result = ShortestPaths.run(graph, List(1, 5)).vertices.collect
+    val shortestPaths = ShortestPaths.run(graph, List(1, 5)).vertices.collect
 
     // prints the results
-    result
+    shortestPaths
       .flatMap {
         case (sourceNode, lengthMap) => lengthMap.map(mapEntry => (sourceNode, mapEntry._1, mapEntry._2))
       }

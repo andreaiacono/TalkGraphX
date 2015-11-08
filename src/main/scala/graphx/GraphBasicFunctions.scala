@@ -35,14 +35,6 @@ object GraphBasicFunctions {
 
     // prints every triplet of the graph
     graph.triplets.foreach(triplet => println(s"${triplet.srcAttr}[${triplet.srcId}] ${triplet.attr} ${triplet.dstAttr}[${triplet.dstId}]"))
-
-    // creates a subgraph with only the "likes" edges
-    graph.subgraph(triplet => triplet.attr == "likes")
-         .triplets.foreach(triplet => println(s"${triplet.srcAttr}[${triplet.srcId}] ${triplet.attr} ${triplet.dstAttr}[${triplet.dstId}]"))
-
-    // creates a subgraph with only the vertices whose name is longer than 3 chars
-    graph.subgraph(triplet => triplet.srcAttr.length > 3 && triplet.dstAttr.length > 3)
-      .triplets.foreach(triplet => println(s"${triplet.srcAttr}[${triplet.srcId}] ${triplet.attr} ${triplet.dstAttr}[${triplet.dstId}]"))
   }
 
   /**

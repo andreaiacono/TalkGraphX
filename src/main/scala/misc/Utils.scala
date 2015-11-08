@@ -7,28 +7,34 @@ import org.apache.spark.{SparkContext, SparkConf}
 object Utils {
 
 
-  def getSparkContext() : SparkContext = {
+  def getSparkContext(): SparkContext = {
     val sparkConf = new SparkConf().setAppName("RDD Sample Application").setMaster("local")
     new SparkContext(sparkConf)
   }
 
 
-  def loadEdges(sparkContext: SparkContext, edgesFilename: String):  RDD[Edge[String]] = {
+  def loadEdges(sparkContext: SparkContext, edgesFilename: String): RDD[Edge[String]] = {
 
     sparkContext.textFile(edgesFilename)
       .map { line =>
         val fields = line.split(" ")
-        Edge(fields(0).toLong, fields(1).toLong, fields(2))
+        if (fields.size == 2) {
+          Edge(fields(0).toLong, fields(1).toLong)
+        }
+        else {
+          Edge(fields(0).toLong, fields(1).toLong, fields(2))
+        }
       }
   }
 
 
-  def loadVertices(sparkContext: SparkContext, verticesFilename: String):  RDD[(VertexId, String)] = {
+  def loadVertices(sparkContext: SparkContext, verticesFilename: String): RDD[(VertexId, (String, Int))] = {
 
     sparkContext.textFile(verticesFilename)
+      .filter( line => line.length > 0 && line.charAt(0) != '#')
       .map { line =>
-        val fields = line.split(" ")
-        (fields(0).toLong, fields(1))
+          val fields = line.split(" ")
+          (fields(0).toLong, (fields(1), fields(2).toInt))
       }
   }
 
@@ -39,7 +45,7 @@ object Utils {
     * @param verticesFilename
     * @return
     */
-  def loadGraphFromFiles(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Graph[String, String] = {
+  def loadGraphFromFiles(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Graph[(String, Int), String] = {
 
     val edges = loadEdges(sparkContext, edgesFilename)
     val vertices = loadVertices(sparkContext, verticesFilename)

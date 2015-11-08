@@ -31,7 +31,7 @@ public class SimpleGraphViewer {
         graph.addAttribute("ui.stylesheet", "url('file:./" + Constants.CSS_FILENAME() + "')");
 
         // adds nodes and edges to the graph
-        addDataFromFile(graph, Constants.VERTICES_FILENAME(), Constants.LIKENESS_EDGES_FILENAME());
+        addDataFromFile(graph, Constants.USERS_VERTICES_FILENAME(), Constants.USERS_DENSE_EDGES_FILENAME());
     }
 
     private void run() {
@@ -51,39 +51,42 @@ public class SimpleGraphViewer {
 
         // loads the nodes
         Path file = Paths.get(verticesFilename);
-        Files.lines(file).forEach(line -> {
-            String[] values = line.split(" ");
-            Node node = graph.addNode(values[1]);
-            node.addAttribute("ui.label", new StringBuilder(values[1]).append(" [").append(values[0]).append("]"));
-            nodesMap.put(values[0], values[1]);
-        });
+        Files.lines(file)
+            .filter( line -> line.charAt(0) != '#')
+            .forEach(line -> {
+                String[] values = line.split(" ");
+                Node node = graph.addNode(values[1]);
+                node.addAttribute("ui.label", new StringBuilder(values[1]).append(" [").append(values[0]).append("]"));
+                nodesMap.put(values[0], values[1]);
+            });
 
         // loads the edges
         file = Paths.get(edgesFilename);
-        Files.lines(file).forEach(line -> {
+        Files.lines(file)
+            .filter( line -> line.charAt(0) != '#')
+            .forEach(line -> {
+                String[] values = line.split(" ");
+                boolean hasLabel = values.length > 2;
+                String id = new StringBuilder(values[0]).append("-").append(values[1]).toString();
+                String reverseId = new StringBuilder(values[1]).append("-").append(values[0]).toString();
 
-            String[] values = line.split(" ");
-            boolean hasLabel = values.length > 2;
-            String id = new StringBuilder(values[0]).append("-").append(values[1]).toString();
-            String reverseId = new StringBuilder(values[1]).append("-").append(values[0]).toString();
+                Edge edge = graph.addEdge(
+                        id,
+                        nodesMap.get(values[0]),
+                        nodesMap.get(values[1]),
+                        true
+                );
 
-            Edge edge = graph.addEdge(
-                    id,
-                    nodesMap.get(values[0]),
-                    nodesMap.get(values[1]),
-                    true
-            );
+                // shows labels correctly for parallel edges
+                String offset = addedEdges.contains(reverseId) ? "0,-50" : "0,50";
+                edge.addAttribute("ui.style", "text-offset: " + offset + ";");
+                if (hasLabel) {
+                    edge.setAttribute("ui.style", "fill-color:" + (values[2].equals("likes") ? "#00CC00":"#CC0000") + ";");
+                    edge.setAttribute("ui.label", values[2]);
+                }
 
-            // shows labels correctly for parallel edges
-            String offset = addedEdges.contains(reverseId) ? "0,-50" : "0,50";
-            edge.addAttribute("ui.style", "text-offset: " + offset + ";");
-            if (hasLabel) {
-                edge.setAttribute("ui.style", "fill-color:" + (values[2].equals("likes") ? "#00CC00":"#CC0000") + ";");
-                edge.setAttribute("ui.label", values[2]);
-            }
-
-            addedEdges.add(id);
-        });
+                addedEdges.add(id);
+            });
     }
 
     public static void main(String args[]) throws IOException {
