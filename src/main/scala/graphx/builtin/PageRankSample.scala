@@ -1,5 +1,6 @@
 package graphx.builtin
 
+import graphstream.SimpleGraphViewer
 import misc.{Constants, Utils}
 import org.apache.spark.SparkContext
 import org.apache.spark.graphx.GraphLoader
@@ -16,8 +17,16 @@ object PageRankSample {
 
   def main(args: Array[String]): Unit = {
 
+    val vertices = Constants.USERS_VERTICES_FILENAME
+    val edges = Constants.PAPERS_EDGES_FILENAME
+
+    // launches the viewer of the graph
+    new SimpleGraphViewer(vertices, edges).run();
+
+    // loads a graph with vertices attributes [user, age] and edges not having any attribute
     val sparkContext = Utils.getSparkContext()
-    runObjectBased(sparkContext, Constants.VERTICES_FILENAME, Constants.PAPERS_EDGES_FILENAME)
+
+    runObjectOriented(sparkContext, vertices, edges)
   }
 
   def runObjectBased(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Unit = {

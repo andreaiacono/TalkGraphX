@@ -1,7 +1,7 @@
 # ID USERNAME AGE
-1 alice 35
-2 bob 41
-3 carol 28
-4 dave 43
-5 eve 29
-6 frank 30
+1 Alice 35
+2 Bob 41
+3 Carol 28
+4 Dave 43
+5 Eve 29
+6 Frank 30

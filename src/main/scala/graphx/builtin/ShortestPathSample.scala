@@ -1,5 +1,6 @@
 package graphx.builtin
 
+import graphstream.SimpleGraphViewer
 import misc.{Constants, Utils}
 import org.apache.spark.graphx.Graph
 import org.apache.spark.graphx.lib.ShortestPaths
@@ -16,8 +17,15 @@ object ShortestPathSample {
 
   def main(args: Array[String]): Unit = {
 
+    val vertices = Constants.USERS_VERTICES_FILENAME
+    val edges = Constants.LIKENESS_EDGES_FILENAME
+
+    // launches the viewer of the graph
+    new SimpleGraphViewer(vertices, edges).run();
+
+    // loads a graph with vertices attributes [user, age] and edges having an attribute
     val sparkContext = Utils.getSparkContext()
-    val graph = Utils.loadGraphFromFiles(sparkContext, Constants.VERTICES_FILENAME, Constants.LIKENESS_EDGES_FILENAME)
+    val graph = Utils.loadGraphFromFiles(sparkContext, vertices, edges)
 
     run(graph)
   }

@@ -1,15 +1,21 @@
 package graphx
 
+import graphstream.SimpleGraphViewer
 import misc.{Constants, Utils}
 
 object GraphTransformations {
 
   def main(args: Array[String]): Unit = {
 
-    val sparkContext = Utils.getSparkContext()
+    val vertices = Constants.USERS_VERTICES_FILENAME
+    val edges = Constants.USERS_EDGES_FILENAME
+
+    // launches the viewer of the graph
+    new SimpleGraphViewer(vertices, edges).run();
 
     // loads a graph with vertices attributes [user, age] and edges not having any attribute
-    val graph = Utils.loadGraphFromFiles(sparkContext, Constants.USERS_VERTICES_FILENAME, Constants.USERS_EDGES_FILENAME)
+    val sparkContext = Utils.getSparkContext()
+    val graph = Utils.loadGraphFromFiles(sparkContext, vertices, edges)
 
     // prints every triplet of the graph
     graph.triplets.foreach(triplet => println(s"${triplet.srcAttr}[${triplet.srcId}] has a connection to ${triplet.dstAttr}[${triplet.dstId}]"))

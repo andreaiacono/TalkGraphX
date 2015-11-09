@@ -21,7 +21,7 @@ public class SimpleGraphViewer {
     private ViewPanel view;
     private double viewPercent = 0.7;
 
-    public SimpleGraphViewer() throws IOException {
+    public SimpleGraphViewer(String verticesFilename, String edgesFilename) throws IOException {
 
         // creates the graph and its attributes
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
@@ -31,10 +31,10 @@ public class SimpleGraphViewer {
         graph.addAttribute("ui.stylesheet", "url('file:./" + Constants.CSS_FILENAME() + "')");
 
         // adds nodes and edges to the graph
-        addDataFromFile(graph, Constants.USERS_VERTICES_FILENAME(), Constants.USERS_DENSE_EDGES_FILENAME());
+        addDataFromFile(graph, verticesFilename, edgesFilename);
     }
 
-    private void run() {
+    public void run() {
         // starts the GUI with a custom mouse wheel listener for zooming in and out
         view = graph.display(true).getDefaultView();
         view.addMouseWheelListener(event -> zoom(event.getWheelRotation() < 0));
@@ -56,7 +56,10 @@ public class SimpleGraphViewer {
             .forEach(line -> {
                 String[] values = line.split(" ");
                 Node node = graph.addNode(values[1]);
-                node.addAttribute("ui.label", new StringBuilder(values[1]).append(" [").append(values[0]).append("]"));
+                StringBuilder label = new StringBuilder(values[1]);
+                if (values.length > 2) label.append(",").append(values[2]);
+                label.append(" [").append(values[0]).append("]");
+                node.addAttribute("ui.label", label.toString());
                 nodesMap.put(values[0], values[1]);
             });
 
@@ -90,6 +93,6 @@ public class SimpleGraphViewer {
     }
 
     public static void main(String args[]) throws IOException {
-        new SimpleGraphViewer().run();
+        new SimpleGraphViewer(Constants.USERS_VERTICES_FILENAME(), Constants.USERS_EDGES_FILENAME()).run();
     }
 }
