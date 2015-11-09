@@ -26,7 +26,7 @@ object PageRankSample {
     // loads a graph with vertices attributes [user, age] and edges not having any attribute
     val sparkContext = Utils.getSparkContext()
 
-    runObjectOriented(sparkContext, vertices, edges)
+    runObjectBased(sparkContext, vertices, edges)
   }
 
   def runObjectBased(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Unit = {
