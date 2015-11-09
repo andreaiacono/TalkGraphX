@@ -35,6 +35,9 @@ object GraphBasicFunctions {
 
     // prints every triplet of the graph
     graph.triplets.foreach(triplet => println(s"${triplet.srcAttr}[${triplet.srcId}] ${triplet.attr} ${triplet.dstAttr}[${triplet.dstId}]"))
+
+    // prints the neighbours of every vertex as Arrays
+    graph.collectNeighbors(EdgeDirection.Either).foreach(vertex => println(s"Vertex [${vertex._1}] has neighbours: [${vertex._2.distinct.mkString(" ")}]"))
   }
 
   /**
