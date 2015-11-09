@@ -43,7 +43,7 @@ object PageRankSample {
 
     // call the GraphX PageRank algorithm from the graph created by only the edges
     val graph = GraphLoader.edgeListFile(sparkContext, edgesFilename)
-    val ranks = graph.pageRank(0.0001).vertices
+    val ranks = graph.pageRank(0.001).vertices
 
     // prints the pagerank for every vertex
     println("Ranks: \n" + ranks

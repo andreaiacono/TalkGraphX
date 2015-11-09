@@ -1,10 +1,10 @@
-1 andrea
-2 chiara
-3 bianca
-4 federico
-5 donatella
-6 giulia
-7 tommaso
-8 giorgia
-9 ziachiara
-10 superpippo
+#ID NAME AGE
+1 tom 34
+2 chiara 51
+3  22
+4 marco 28
+5 lucia 40
+6 meria 32
+7 tommy 30
+8 giulio 45
+9 ada 33

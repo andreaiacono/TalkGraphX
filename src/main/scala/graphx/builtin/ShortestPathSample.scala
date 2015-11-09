@@ -18,10 +18,10 @@ object ShortestPathSample {
   def main(args: Array[String]): Unit = {
 
     val vertices = Constants.USERS_VERTICES_FILENAME
-    val edges = Constants.LIKENESS_EDGES_FILENAME
+    val edges = Constants.EDGES_FILENAME
 
     // launches the viewer of the graph
-    new SimpleGraphViewer(vertices, edges).run();
+    new SimpleGraphViewer(vertices, edges).run()
 
     // loads a graph with vertices attributes [user, age] and edges having an attribute
     val sparkContext = Utils.getSparkContext()

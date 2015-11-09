@@ -70,11 +70,16 @@ public class SimpleGraphViewer {
             .forEach(line -> {
                 String[] values = line.split(" ");
                 boolean hasLabel = values.length > 2;
-                String id = new StringBuilder(values[0]).append("-").append(values[1]).toString();
+                StringBuilder id = new StringBuilder(values[0]).append("-").append(values[1]);
+                int counter = 0;
+                // for allowing multiple edges with the same source and same destination
+                while (addedEdges.contains(id.toString())) {
+                    id.append("-").append(counter ++);
+                }
                 String reverseId = new StringBuilder(values[1]).append("-").append(values[0]).toString();
 
                 Edge edge = graph.addEdge(
-                        id,
+                        id.toString(),
                         nodesMap.get(values[0]),
                         nodesMap.get(values[1]),
                         true
@@ -84,11 +89,11 @@ public class SimpleGraphViewer {
                 String offset = addedEdges.contains(reverseId) ? "0,-50" : "0,50";
                 edge.addAttribute("ui.style", "text-offset: " + offset + ";");
                 if (hasLabel) {
-                    edge.setAttribute("ui.style", "fill-color:" + (values[2].equals("likes") ? "#00CC00":"#CC0000") + ";");
+                    edge.setAttribute("ui.style", "fill-color:" + (values[2].equals("likes") ? "#00CC00":"#0000BB") + ";");
                     edge.setAttribute("ui.label", values[2]);
                 }
 
-                addedEdges.add(id);
+                addedEdges.add(id.toString());
             });
     }
 
