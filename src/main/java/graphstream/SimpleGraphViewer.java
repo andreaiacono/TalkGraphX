@@ -37,6 +37,7 @@ public class SimpleGraphViewer {
     public void run() {
         // starts the GUI with a custom mouse wheel listener for zooming in and out
         view = graph.display(true).getDefaultView();
+        view.resizeFrame(300, 200);
         view.addMouseWheelListener(event -> zoom(event.getWheelRotation() < 0));
     }
 

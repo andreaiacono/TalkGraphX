@@ -1,5 +1,6 @@
 package rdd
 
+import misc.Constants
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -15,7 +16,7 @@ object RddSample {
     val squaredRdd = rdd.map(x => x*x)
     printRdd(squaredRdd)
 
-    loadFromFile("/home/andrea/test.txt", sparkContext)
+    printRdd(loadFromFile(Constants.EDGES_FILENAME, sparkContext))
   }
 
   def createRdd(sparkContext: SparkContext): RDD[Int] = {
@@ -23,13 +24,12 @@ object RddSample {
     return sparkContext.parallelize(data)
   }
 
-  def printRdd(rdd: RDD[Int]): Unit = {
-    rdd.foreach(x => print(x + " "))
+  def printRdd[A](rdd: RDD[A]): Unit = {
+    rdd.foreach(x => print(x + "\n"))
   }
 
-  def loadFromFile(fileName: String, sparkContext: SparkContext): Unit = {
-    val dataFile = sparkContext.textFile(fileName, 2).cache()
-    return dataFile
+  def loadFromFile(fileName: String, sparkContext: SparkContext): RDD[String] = {
+    sparkContext.textFile(fileName)
   }
 
 }
