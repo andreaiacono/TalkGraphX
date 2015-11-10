@@ -3,7 +3,7 @@ package graphx.builtin
 import graphstream.SimpleGraphViewer
 import misc.{Constants, Utils}
 import org.apache.spark.SparkContext
-import org.apache.spark.graphx.GraphLoader
+import org.apache.spark.graphx.{VertexRDD, GraphLoader}
 import org.apache.spark.graphx.lib.PageRank
 
 /**
@@ -26,24 +26,30 @@ object PageRankSample {
     // loads a graph with vertices attributes [user, age] and edges not having any attribute
     val sparkContext = Utils.getSparkContext()
 
+    // two ways to call the same algorithm
     runObjectBased(sparkContext, vertices, edges)
+    runObjectOriented(sparkContext, vertices, edges)
+  }
+
+  def runObjectOriented(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Unit = {
+
+    // call the GraphX PageRank algorithm from the graph, passing the tolerance
+    val graph = GraphLoader.edgeListFile(sparkContext, edgesFilename)
+    val ranks = graph.pageRank(0.001).vertices
+
+    printResults(ranks, sparkContext, verticesFilename)
   }
 
   def runObjectBased(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Unit = {
 
-    // call the GraphX PageRank algorithm passing the graph created by only the edges
+    // call the GraphX PageRank algorithm passing the graph, stopping at 5 iterations
     val graph = GraphLoader.edgeListFile(sparkContext, edgesFilename)
-    val ranks = PageRank.run(graph, 5)
+    val ranks = PageRank.run(graph, 5).vertices
 
-    println("Ranks: \n" + ranks)
+    printResults(ranks, sparkContext, verticesFilename)
   }
 
-
-  def runObjectOriented(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Unit = {
-
-    // call the GraphX PageRank algorithm from the graph created by only the edges
-    val graph = GraphLoader.edgeListFile(sparkContext, edgesFilename)
-    val ranks = graph.pageRank(0.001).vertices
+  def printResults(ranks: VertexRDD[Double], sparkContext: SparkContext, verticesFilename: String): Unit = {
 
     // prints the pagerank for every vertex
     println("Ranks: \n" + ranks
@@ -63,4 +69,5 @@ object PageRankSample {
 
     println("Ranks: \n" + ranksByUsername.collect().mkString("\n"))
   }
+
 }
