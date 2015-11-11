@@ -30,21 +30,21 @@ object PregelSample {
     // we want to know the shortest paths from this vertex to all the others vertices
     val vertexSourceId: VertexId = 1L  // vertexId 1 is the city of Arad
 
-    // initialize the graph such that all vertices except the root have distance infinity.
+    // initialize the graph such that all vertices except the root have distance infinity
     val initialGraph : Graph[(Double, List[VertexId]), Double] = graph.mapVertices((id, _) => if (id == vertexSourceId) (0.0, List[VertexId](vertexSourceId)) else (Double.PositiveInfinity, List[VertexId]()))
 
     val shortestPaths = initialGraph.pregel(
       (Double.PositiveInfinity, List[VertexId]()),  // initial message
       Int.MaxValue,                                 // max iterations
-      EdgeDirection.Out                             // where to send messages
+      EdgeDirection.Out                             // defines which vertices will run the sendMsg function
     )(
       // vertex program
-      (id, dist, newDist) => if (dist._1 < newDist._1) dist else newDist,
+      (vertexId, actualDistance, newDistance) => if (actualDistance._1 < newDistance._1) actualDistance else newDistance,
 
       // sendMsg
-      triplet => {
-        if (triplet.srcAttr._1 < triplet.dstAttr._1 - triplet.attr ) {
-          Iterator((triplet.dstId, (triplet.srcAttr._1 + triplet.attr , triplet.srcAttr._2 :+ triplet.dstId)))
+      edgeTriplet => {
+        if (edgeTriplet.srcAttr._1 < edgeTriplet.dstAttr._1 - edgeTriplet.attr ) {
+          Iterator((edgeTriplet.dstId, (edgeTriplet.srcAttr._1 + edgeTriplet.attr , edgeTriplet.srcAttr._2 :+ edgeTriplet.dstId)))
         } else {
           Iterator.empty
         }

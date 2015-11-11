@@ -3,7 +3,7 @@
 3 Oradea 
 4 Sibiu 
 5 Fagaras 
-6 Rimnicu Vilcea 
+6 RimnicuVilcea
 7 Pitesti 
 8 Timisoara 
 9 Lugoj 
