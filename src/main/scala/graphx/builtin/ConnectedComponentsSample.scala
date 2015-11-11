@@ -19,7 +19,7 @@ object ConnectedComponentsSample {
     val edges = Constants.USERS_DISJOINT_EDGES_FILENAME
 
     // launches the viewer of the graph
-    new SimpleGraphViewer(vertices, edges).run();
+    new SimpleGraphViewer(vertices, edges, false).run();
 
     // loads a graph with vertices attributes [user, age] and edges not having any attribute
     val sparkContext = Utils.getSparkContext()
@@ -33,9 +33,10 @@ object ConnectedComponentsSample {
     // calls the GraphX connected components algorithm on the graph
     val connectedComponents = ConnectedComponents.run(graph)
 
-    connectedComponents.vertices
+    connectedComponents.vertices.groupBy( { case (vertexId: Long, setId: Long) => setId } )
       .foreach {
-        case (vertexId: Long, setId: Long) => println(s"Vertex [${vertexId}] belongs to Set [${setId}]")
+        case (setId: Long, verticesIds) =>
+          println(s"Set [${setId}] contains [${verticesIds.map { case (setNumber, vertexId) => setNumber } mkString(", ")}]")
       }
   }
 

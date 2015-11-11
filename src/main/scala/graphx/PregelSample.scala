@@ -14,7 +14,7 @@ object PregelSample {
     val edges = Constants.CITIES_EDGES_FILENAME
 
     // launches the viewer of the graph
-    new SimpleGraphViewer(vertices, edges).run()
+    new SimpleGraphViewer(vertices, edges, false).run()
 
     // loads the graph
     val sparkContext = Utils.getSparkContext()

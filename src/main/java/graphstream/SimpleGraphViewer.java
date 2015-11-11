@@ -18,7 +18,7 @@ public class SimpleGraphViewer {
     private ViewPanel view;
     private double viewPercent = 0.7;
 
-    public SimpleGraphViewer(String verticesFilename, String edgesFilename) throws IOException {
+    public SimpleGraphViewer(String verticesFilename, String edgesFilename, boolean isDirected) throws IOException {
 
         // creates the graph and its attributes
         System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
@@ -28,13 +28,17 @@ public class SimpleGraphViewer {
         graph.addAttribute("ui.stylesheet", "url('file:./" + Constants.CSS_FILENAME() + "')");
 
         // adds nodes and edges to the graph
-        addDataFromFile(graph, verticesFilename, edgesFilename);
+        addDataFromFile(graph, verticesFilename, edgesFilename, isDirected);
+    }
+
+    public SimpleGraphViewer(String verticesFilename, String edgesFilename) throws IOException {
+        this(verticesFilename, edgesFilename, true);
     }
 
     public void run() {
         // starts the GUI with a custom mouse wheel listener for zooming in and out
         view = graph.display(true).getDefaultView();
-        view.resizeFrame(600, 500);
+        view.resizeFrame(800, 600);
         view.addMouseWheelListener(event -> zoom(event.getWheelRotation() < 0));
     }
 
@@ -43,7 +47,7 @@ public class SimpleGraphViewer {
         view.getCamera().setViewPercent(viewPercent);
     }
 
-    public void addDataFromFile(Graph graph, String verticesFilename, String edgesFilename) throws IOException {
+    public void addDataFromFile(Graph graph, String verticesFilename, String edgesFilename, boolean isDirected) throws IOException {
         Map<String, String> nodesMap = new HashMap<>();
         Set<String> addedEdges = new HashSet<>();
 
@@ -53,12 +57,13 @@ public class SimpleGraphViewer {
             .filter( line -> line.charAt(0) != '#')
             .forEach(line -> {
                 String[] values = line.split(" ");
+                nodesMap.put(values[0], values[1]);
+
                 Node node = graph.addNode(values[1]);
                 StringBuilder label = new StringBuilder(values[1]);
                 if (values.length > 2) label.append(",").append(values[2]);
                 label.append("[").append(values[0]).append("]");
                 node.addAttribute("ui.label", label.toString());
-                nodesMap.put(values[0], values[1]);
             });
 
         // loads the edges
@@ -68,34 +73,46 @@ public class SimpleGraphViewer {
             .forEach(line -> {
                 String[] values = line.split(" ");
                 boolean hasLabel = values.length > 2;
+
                 StringBuilder id = new StringBuilder(values[0]).append("-").append(values[1]);
                 int counter = 0;
                 // for allowing multiple edges with the same source and same destination
                 while (addedEdges.contains(id.toString())) {
+                    if (counter > 0) id.delete(id.lastIndexOf("-")+1, id.length()-1);
                     id.append("-").append(counter ++);
                 }
+                // FIXME: has to be fixed for multiple edges with same source and same dest
                 String reverseId = new StringBuilder(values[1]).append("-").append(values[0]).toString();
-
                 Edge edge = graph.addEdge(
                         id.toString(),
                         nodesMap.get(values[0]),
                         nodesMap.get(values[1]),
-                        true
+                        isDirected
                 );
 
-                // shows labels correctly for parallel edges
-                String offset = addedEdges.contains(reverseId) ? "0,-50" : "0,50";
-                edge.addAttribute("ui.style", "text-offset: " + offset + ";");
+                // set layout attributes according to graph type
+                StringBuilder uiStyleAttribute = new StringBuilder();
                 if (hasLabel) {
-                    edge.setAttribute("ui.style", "fill-color:" + (values[2].equals("likes") ? "#00CC00":"#0000BB") + ";");
                     edge.setAttribute("ui.label", values[2]);
+                    uiStyleAttribute
+                            .append("fill-color:")
+                            .append((values[2].equals("likes") ? "#00CC00":"#0000BB"))
+                            .append(";");
                 }
+
+                if (isDirected) {
+                    uiStyleAttribute
+                            .append("text-offset: ")
+                            .append(addedEdges.contains(reverseId) ? "0,-10;" : "0,10;");
+                }
+                else {
+                    uiStyleAttribute
+                            .append("text-offset: 0,-10;")
+                            .append("fill-color: #0000BB;");
+                }
+                edge.setAttribute("ui.style", uiStyleAttribute.toString());
 
                 addedEdges.add(id.toString());
             });
-    }
-
-    public static void main(String args[]) throws IOException {
-        new SimpleGraphViewer(Constants.USERS_VERTICES_FILENAME(), Constants.USERS_EDGES_FILENAME()).run();
     }
 }

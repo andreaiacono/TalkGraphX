@@ -17,7 +17,5 @@ node:clicked {
     text-offset: 0, 0;
 }
 edge {
-    text-visibility-mode: under-zoom;
-    text-visibility: 0.9;
     text-alignment: along;
 }
