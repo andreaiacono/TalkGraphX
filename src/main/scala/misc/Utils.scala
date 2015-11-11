@@ -53,6 +53,25 @@ object Utils {
     Graph(vertices, edges)
   }
 
+  def loadCitiesGraphFromFiles(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Graph[String, Double] = {
+
+    val edges = sparkContext.textFile(edgesFilename)
+      .map { line =>
+              val fields = line.split(" ")
+              Edge(fields(0).toLong, fields(1).toLong, fields(2).toDouble)
+      }
+
+    val vertices = sparkContext.textFile(verticesFilename)
+      .filter( line => line.length > 0 && line.charAt(0) != '#')
+      .map { line =>
+              val fields = line.split(" ")
+              (fields(0).toLong, (fields(1)))
+      }
+
+    Graph(vertices, edges)
+  }
+
+
   /**
     * prints the relationships among the nodes of the graph
     * @param graph

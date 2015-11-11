@@ -10,10 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class SimpleGraphViewer {
 
@@ -37,7 +34,7 @@ public class SimpleGraphViewer {
     public void run() {
         // starts the GUI with a custom mouse wheel listener for zooming in and out
         view = graph.display(true).getDefaultView();
-        view.resizeFrame(300, 200);
+        view.resizeFrame(600, 500);
         view.addMouseWheelListener(event -> zoom(event.getWheelRotation() < 0));
     }
 
@@ -59,7 +56,7 @@ public class SimpleGraphViewer {
                 Node node = graph.addNode(values[1]);
                 StringBuilder label = new StringBuilder(values[1]);
                 if (values.length > 2) label.append(",").append(values[2]);
-                label.append(" [").append(values[0]).append("]");
+                label.append("[").append(values[0]).append("]");
                 node.addAttribute("ui.label", label.toString());
                 nodesMap.put(values[0], values[1]);
             });

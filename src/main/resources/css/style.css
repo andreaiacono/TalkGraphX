@@ -18,6 +18,6 @@ node:clicked {
 }
 edge {
     text-visibility-mode: under-zoom;
-    text-visibility: 0.7;
+    text-visibility: 0.9;
     text-alignment: along;
 }

@@ -1,8 +1,8 @@
 # Talk GraphX
 This is the repository for the talk about GraphX given at the [Codemotion Milan](http://milan2015.codemotionworld.com/) conference in november 2015.
 
-## Compile and run
-To compile and run, you have to create a scala project and add as libraries for the project the jar
+## Compile
+To compile, you have to create a scala project and add as libraries for the project the jar
 
     spark-assembly-1.5.1-hadoop2.6.0.jar
 
@@ -20,13 +20,13 @@ You also need the GraphStream v1.3 jars:
 
 Spark 1.5.1 uses Scala version 2.10, so you need to use a compatible Scala version (2.10.x).
 
+Sorry, no SBT or maven.
+
+## Usage
 Every class in package `src/main/scala/graphx` is auto-contained, so you can run it and see how it works by inspecting the code of the class itself.
+The package `src/main/scala/graphx/builtin` contains some examples of how to call the GraphX builtin algorithms on some datasets.
+A simple graph viewer is automatically launched for every class, so that you can see on the graph the results of computation.
 
 ## Data
 The datafiles are contained in `src/main/resources/data` directory. The filenames ending in `_edges.txt` are the data files for edges of the graphs, while the files ending in `_vertices.txt` are the ones for the vertices.
 Note that for every vertices file there can be more than one edges file.
-
-## Contents
-The package `src/main/scala/graphx/builtin` contains some examples of how to call the GraphX builtin algorithms on some datasets.
-There's a simple graph viewer in `src/main/java/graphstream/SimpleGraphViewer`: you can choose the dataset to view changing the file specified in `addDataFromFile()` method.
-

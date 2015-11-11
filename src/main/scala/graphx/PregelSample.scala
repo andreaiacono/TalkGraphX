@@ -2,96 +2,59 @@ package graphx
 
 import graphstream.SimpleGraphViewer
 import misc.{Constants, Utils}
-import org.apache.spark.{SparkContext, SparkConf}
-import org.apache.spark.graphx.util.GraphGenerators
+import org.apache.spark.SparkContext
 import org.apache.spark.graphx._
 
 
 object PregelSample {
 
-
   def main(args: Array[String]): Unit = {
 
-    val vertices = Constants.USERS_VERTICES_FILENAME
-    val edges = Constants.LIKENESS_EDGES_FILENAME
+    val vertices = Constants.CITIES_VERTICES_FILENAME
+    val edges = Constants.CITIES_EDGES_FILENAME
 
     // launches the viewer of the graph
     new SimpleGraphViewer(vertices, edges).run()
 
     // loads the graph
     val sparkContext = Utils.getSparkContext()
-    val graph = Utils.loadGraphFromFiles(sparkContext, vertices, edges)
-    furthestDistance(sparkContext, graph)
+    val graph = Utils.loadCitiesGraphFromFiles(sparkContext, vertices, edges)
+
+    // launches pregel computation
+    shortestPath(sparkContext, graph)
   }
 
-  def furthestDistance(sparkContext: SparkContext, graph: Graph[(String, PartitionID), String]) = {
 
-    Pregel(
-      graph.mapVertices((vid, vd) => 0),
-      initialMsg = 0,
-      activeDirection = EdgeDirection.Out
+  def shortestPath(sc: SparkContext, graph: Graph[String, Double]) = {
+
+    // we want to know the shortest paths from this vertex to all the others vertices
+    val vertexSourceId: VertexId = 1L  // vertexId 1 is the city of Arad
+
+    // initialize the graph such that all vertices except the root have distance infinity.
+    val initialGraph : Graph[(Double, List[VertexId]), Double] = graph.mapVertices((id, _) => if (id == vertexSourceId) (0.0, List[VertexId](vertexSourceId)) else (Double.PositiveInfinity, List[VertexId]()))
+
+    val shortestPaths = initialGraph.pregel(
+      (Double.PositiveInfinity, List[VertexId]()),  // initial message
+      Int.MaxValue,                                 // max iterations
+      EdgeDirection.Out                             // where to send messages
     )(
-      (id, vd, a) => math.max(vd, a),
-      et => Iterator((et.dstId, et.srcAttr + 1)),
-      math.max(_, _)).vertices.collect.foreach(println(_)
-    )
-  }
+      // vertex program
+      (id, dist, newDist) => if (dist._1 < newDist._1) dist else newDist,
 
-  def sssp(sc: SparkContext) = {
-
-    val graph: Graph[Long, Double] = GraphGenerators.logNormalGraph(sc, numVertices = 100).mapEdges(e => e.attr.toDouble)
-    val sourceId: VertexId = 42 // The ultimate source
-
-    // Initialize the graph such that all vertices except the root have distance infinity.
-    val initialGraph = graph.mapVertices((id, _) => if (id == sourceId) 0.0 else Double.PositiveInfinity)
-
-    val sssp = initialGraph.pregel(Double.PositiveInfinity, 10, EdgeDirection.Out)(
-      (id, dist, newDist) => math.min(dist, newDist), // Vertex Program
+      // sendMsg
       triplet => {
-        // Send Message
-        if (triplet.srcAttr + triplet.attr < triplet.dstAttr) {
-          Iterator((triplet.dstId, triplet.srcAttr + triplet.attr))
+        if (triplet.srcAttr._1 < triplet.dstAttr._1 - triplet.attr ) {
+          Iterator((triplet.dstId, (triplet.srcAttr._1 + triplet.attr , triplet.srcAttr._2 :+ triplet.dstId)))
         } else {
           Iterator.empty
         }
       },
-      (a, b) => math.min(a, b) // Merge Message
+      // mergeMsg
+      (a, b) => if (a._1 < b._1) a else b
     )
 
-    println(sssp.vertices.collect.mkString("\n"))
-  }
-
-
-  def basic_sample(graph: Graph[(String, PartitionID), String]): Unit = {
-
-    val initialMsg = 9999
-    def vprog(vertexId: VertexId, value: (String, Int), message: Int): (String, Int) = {
-      if (message == initialMsg)
-        value
-      else
-        (value._1, message min value._2)
-    }
-
-    def sendMsg(triplet: EdgeTriplet[(String, Int), String]): Iterator[(VertexId, Int)] = {
-      val sourceVertex = triplet.srcAttr
-
-      if (sourceVertex._1 == sourceVertex._2)
-        Iterator.empty
-      else
-        Iterator((triplet.dstId, sourceVertex._2))
-    }
-
-    def mergeMsg(msg1: Int, msg2: Int): Int = msg1 min msg2
-
-    val minGraph = graph.pregel(initialMsg,
-      10,
-      EdgeDirection.Out)(
-      vprog,
-      sendMsg,
-      mergeMsg)
-
-    minGraph.vertices.collect.foreach {
-      case (vertexId, (value, original_value)) => println(value)
+    shortestPaths.vertices.collect.foreach {
+       case (destVertexId, (distance, path)) => println(s"Going from Vertex 1 to $destVertexId has a distance of $distance km. Path is ${path.mkString(", ")}")
     }
   }
 
