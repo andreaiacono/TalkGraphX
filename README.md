@@ -20,7 +20,7 @@ You also need the GraphStream v1.3 jars:
 
 Spark 1.5.1 uses Scala version 2.10, so you need to use a compatible Scala version (2.10.x).
 
-Sorry, no SBT or maven.
+Sorry, no SBT or maven for now.
 
 ## Usage
 Every class in package `src/main/scala/graphx` is auto-contained, so you can run it and see how it works by inspecting the code of the class itself.
