@@ -1,56 +1,63 @@
 package graphx
 
 import graphstream.SimpleGraphViewer
-import misc.{Constants, Utils}
+import org.apache.spark.graphx.{VertexRDD, Graph}
 
 object GraphAggregation {
 
   def main(args: Array[String]): Unit = {
 
-    val vertices = Constants.USERS_VERTICES_FILENAME
-    val edges = Constants.LIKENESS_EDGES_FILENAME
+    val vertices = USERS_VERTICES_FILENAME
+    val edges = LIKENESS_EDGES_FILENAME
 
     // launches the viewer of the graph
     new SimpleGraphViewer(vertices, edges).run()
 
     // loads the graph
-    val sparkContext = Utils.getSparkContext()
-    val graph = Utils.loadGraphFromFiles(sparkContext, vertices, edges)
+    val sparkContext = getSparkContext()
+    val graph: Graph[Person, String] = loadGraphFromFiles(sparkContext, vertices, edges)
 
     // computes the out degree of every vertex
-    // concise version of the same function call: graph.aggregateMessages[Int](_.sendToSrc(1), _+_)
-    graph
-      .aggregateMessages[Int](
-        edgeContext => edgeContext.sendToSrc(1), //  sendMsg function : for every edge, we send a 1 to the source of the edge
-        (a, b) => a + b //  mergeMsg function: every vertex will sum all the received 1s
+    val outDegreeOfEveryVertex: VertexRDD[Int] =
+      graph.aggregateMessages[Int](
+        sendMsg = edgeContext => edgeContext.sendToSrc(1), // for every edge, we send a 1 to the source of the edge
+        mergeMsg = sum                                     // every vertex will sum all the received 1s
       )
-      .foreach(
-        vertex => println(s"Vertex [${vertex._1}] has ${vertex._2} outgoing edges.")
-      )
+
+    for (outDegree <- outDegreeOfEveryVertex) {
+       println(s"Vertex [${outDegree._1}] has ${outDegree._2} outgoing edges.")
+    }
 
     // compute the oldest incoming user of every vertex
-    graph
-      .aggregateMessages[Int](
-        edgeContext => edgeContext.sendToDst(edgeContext.srcAttr._2), // sendMsg function : for every edge, we send the age of the source to the destination
-        (a, b) => if (a > b) a else b // mergeMsg function: we compare the received ages and choose the higher
-      )
-      .foreach(
-        vertex => println(s"The oldest incoming user for vertex [${vertex._1}] is ${vertex._2} years old.")
+    val oldestIncomingUserOfEveryVertex =
+      graph.aggregateMessages[Int](
+        // for every edge, we send the age of the source to the destination
+        sendMsg = edgeContext => edgeContext.sendToDst(edgeContext.srcAttr.age),
+        // we compare the received ages and choose the higher
+        mergeMsg = pickTheOlderOne
       )
 
+    for (oldestUser <- oldestIncomingUserOfEveryVertex) {
+      println(s"The oldest incoming user for vertex [${oldestUser.id}] is ${oldestUser.value} years old.")
+    }
+
     // compute the oldest follower younger than 40 of every vertex
-    graph
-      .aggregateMessages[Int](
-        // sendMsg function : for every edge, we send the age of the source to the destination only if
+    val oldestFollowerYoungerThan40 =
+      graph.aggregateMessages[Int](
+        // for every edge, we send the age of the source to the destination only if
         // the source is younger than 35 and is "following" the destination
-        edgeContext => if (edgeContext.srcAttr._2 < 40 && edgeContext.attr == "follows") {
-                            edgeContext.sendToDst(edgeContext.srcAttr._2)
-                       },
-        // mergeMsg function: we compare the received ages and choose the higher
-        (a, b) => if (a > b) a else b
+        sendMsg = edgeContext =>
+          if (edgeContext.srcAttr.age < 40 && edgeContext.attr == "follows") {
+            edgeContext.sendToDst(edgeContext.srcAttr.age)
+          },
+        // we compare the received ages and choose the higher
+        mergeMsg = pickTheOlderOne
       )
-      .foreach(
-        vertex => println(s"The oldest follower younger than 40 for vertex [${vertex._1}] is ${vertex._2} years old.")
-      )
+
+    for (oldestUser <- oldestFollowerYoungerThan40) {
+      println(s"The oldest follower younger than 40 for vertex [${oldestUser.id}] is ${oldestUser.value} years old.")
+    }
+
   }
+
 }

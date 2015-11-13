@@ -1,61 +1,69 @@
 package graphx
 
 import graphstream.SimpleGraphViewer
-import misc.{Constants, Utils}
 import org.apache.spark.SparkContext
 import org.apache.spark.graphx._
 
+object PregelSample extends App {
 
-object PregelSample {
+  val vertices = CITIES_VERTICES_FILENAME
+  val edges = CITIES_EDGES_FILENAME
 
-  def main(args: Array[String]): Unit = {
+  // launches the viewer of the graph
+  new SimpleGraphViewer(vertices, edges, false).run()
 
-    val vertices = Constants.CITIES_VERTICES_FILENAME
-    val edges = Constants.CITIES_EDGES_FILENAME
+  // loads the graph
+  val sparkContext = getSparkContext()
+  val graph = loadCitiesGraphFromFiles(sparkContext, vertices, edges)
 
-    // launches the viewer of the graph
-    new SimpleGraphViewer(vertices, edges, false).run()
-
-    // loads the graph
-    val sparkContext = Utils.getSparkContext()
-    val graph = Utils.loadCitiesGraphFromFiles(sparkContext, vertices, edges)
-
-    // launches pregel computation
-    shortestPath(sparkContext, graph)
-  }
-
+  // launches pregel computation
+  shortestPath(sparkContext, graph)
 
   def shortestPath(sc: SparkContext, graph: Graph[String, Double]) = {
 
     // we want to know the shortest paths from this vertex to all the others vertices
-    val vertexSourceId: VertexId = 1L  // vertexId 1 is the city of Arad
+    // vertexId 1 is the city of Arad
+    val vertexSourceId: VertexId = 1L
 
     // initialize the graph such that all vertices except the root have distance infinity
-    val initialGraph : Graph[(Double, List[VertexId]), Double] = graph.mapVertices((id, _) => if (id == vertexSourceId) (0.0, List[VertexId](vertexSourceId)) else (Double.PositiveInfinity, List[VertexId]()))
+    val initialGraph: Graph[(Double, List[VertexId]), Double] =
+      graph.mapVertices((id, _) =>
+        if (id == vertexSourceId)
+          (0.0, List[VertexId](vertexSourceId))
+        else
+          (Double.PositiveInfinity, List[VertexId]()))
 
-    val shortestPaths = initialGraph.pregel(
-      (Double.PositiveInfinity, List[VertexId]()),  // initial message
-      Int.MaxValue,                                 // max iterations
-      EdgeDirection.Out                             // defines which vertices will run the sendMsg function
-    )(
-      // vertex program
-      (vertexId, actualDistance, newDistance) => if (actualDistance._1 < newDistance._1) actualDistance else newDistance,
+    // step #1: define the initial message, max iterations and active direction
+    val shortestPathFunction = initialGraph.pregel(
+      initialMsg = (Double.PositiveInfinity, List[VertexId]()),
+      maxIterations = Int.MaxValue,
+      activeDirection = EdgeDirection.Out) _
+
+    // step #2: define the vertex program, send message and merge message
+    val result = shortestPathFunction(
+
+      // vprog
+      (vertexId, currentAttr, newAttr) =>
+        if (currentAttr.distance < newAttr.distance) currentAttr else newAttr,
 
       // sendMsg
       edgeTriplet => {
-        if (edgeTriplet.srcAttr._1 < edgeTriplet.dstAttr._1 - edgeTriplet.attr ) {
-          Iterator((edgeTriplet.dstId, (edgeTriplet.srcAttr._1 + edgeTriplet.attr , edgeTriplet.srcAttr._2 :+ edgeTriplet.dstId)))
+        if (edgeTriplet.srcAttr.distance < (edgeTriplet.dstAttr.distance - edgeTriplet.attr)) {
+          Iterator((edgeTriplet.dstId, (edgeTriplet.srcAttr.distance + edgeTriplet.attr, edgeTriplet.srcAttr.vertices :+ edgeTriplet.dstId)))
         } else {
           Iterator.empty
         }
       },
+
       // mergeMsg
-      (a, b) => if (a._1 < b._1) a else b
+      (city1, city2) => if (city1.distance < city2.distance) city1 else city2
+
     )
 
-    shortestPaths.vertices.collect.foreach {
-       case (destVertexId, (distance, path)) => println(s"Going from Vertex 1 to $destVertexId has a distance of $distance km. Path is ${path.mkString(", ")}")
+    for ((destVertexId, (distance, path)) <- result.vertices) {
+      println(s"Going from Vertex 1 to $destVertexId has a distance of $distance km. Path is ${path.mkString(", ")}")
     }
+
   }
 
 }

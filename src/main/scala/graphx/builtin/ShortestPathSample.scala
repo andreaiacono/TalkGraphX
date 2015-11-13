@@ -1,7 +1,7 @@
 package graphx.builtin
 
 import graphstream.SimpleGraphViewer
-import misc.{Constants, Utils}
+import graphx._
 import org.apache.spark.graphx.Graph
 import org.apache.spark.graphx.lib.ShortestPaths
 
@@ -17,20 +17,20 @@ object ShortestPathSample {
 
   def main(args: Array[String]): Unit = {
 
-    val vertices = Constants.USERS_VERTICES_FILENAME
-    val edges = Constants.EDGES_FILENAME
+    val vertices = USERS_VERTICES_FILENAME
+    val edges = EDGES_FILENAME
 
     // launches the viewer of the graph
     new SimpleGraphViewer(vertices, edges).run()
 
     // loads a graph with vertices attributes [user, age] and edges having an attribute
-    val sparkContext = Utils.getSparkContext()
-    val graph = Utils.loadGraphFromFiles(sparkContext, vertices, edges)
+    val sparkContext = getSparkContext()
+    val graph = loadGraphFromFiles(sparkContext, vertices, edges)
 
     run(graph)
   }
 
-  def run(graph: Graph[(String, Int), String]): Unit = {
+  def run(graph: Graph[Person, String]): Unit = {
 
     // calls the GraphX shortest path algorithm on the graph for nodes 1 and 5 (so we have
     // the shortest path between these two nodes and all the other nodes of the graph)
@@ -39,7 +39,7 @@ object ShortestPathSample {
     // prints the results
     shortestPaths
       .flatMap {
-        case (sourceNode, lengthMap) => lengthMap.map(mapEntry => (sourceNode, mapEntry._1, mapEntry._2))
+        case (sourceNode, lengthMap) => lengthMap.map(mapEntry => (sourceNode, mapEntry.id, mapEntry.value))
       }
       .foreach {
         case (sourceNode, destNode, pathLength) => println(s"Shortest path from [$sourceNode] to [$destNode] is $pathLength")

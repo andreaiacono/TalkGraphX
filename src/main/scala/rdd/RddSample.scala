@@ -1,6 +1,6 @@
 package rdd
 
-import misc.Constants
+import graphx._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -16,7 +16,7 @@ object RddSample {
     val squaredRdd = rdd.map(x => x*x)
     printRdd(squaredRdd)
 
-    printRdd(loadFromFile(Constants.EDGES_FILENAME, sparkContext))
+    printRdd(loadFromFile(EDGES_FILENAME, sparkContext))
   }
 
   def createRdd(sparkContext: SparkContext): RDD[Int] = {
