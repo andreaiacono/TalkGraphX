@@ -1,5 +1,5 @@
 # Talk GraphX
-This is the repository for the talk about GraphX given at the [Codemotion Milan](http://milan2015.codemotionworld.com/) conference in november 2015.
+This is the repository for the talk about GraphX given at the [Codemotion Milan](http://milan2015.codemotionworld.com/) conference in november 2015. Slides available here: [http://www.slideshare.net/andreaiacono/graphs-are-everywhere-distributed-graph-computing-with-spark-graphx](http://www.slideshare.net/andreaiacono/graphs-are-everywhere-distributed-graph-computing-with-spark-graphx)
 
 ## Compile
 To compile, you have to create a scala project and add as libraries for the project the jar
