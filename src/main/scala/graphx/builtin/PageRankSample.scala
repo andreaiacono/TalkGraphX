@@ -1,7 +1,7 @@
 package graphx.builtin
 
 import graphstream.SimpleGraphViewer
-import misc.{Constants, Utils}
+import graphx._
 import org.apache.spark.SparkContext
 import org.apache.spark.graphx.{VertexRDD, GraphLoader}
 import org.apache.spark.graphx.lib.PageRank
@@ -17,14 +17,14 @@ object PageRankSample {
 
   def main(args: Array[String]): Unit = {
 
-    val vertices = Constants.USERS_VERTICES_FILENAME
-    val edges = Constants.PAPERS_EDGES_FILENAME
+    val vertices = USERS_VERTICES_FILENAME
+    val edges = PAPERS_EDGES_FILENAME
 
     // launches the viewer of the graph
     new SimpleGraphViewer(vertices, edges).run();
 
     // loads a graph with vertices attributes [user, age] and edges not having any attribute
-    val sparkContext = Utils.getSparkContext()
+    val sparkContext = getSparkContext()
 
     // two ways to call the same algorithm
     runObjectBased(sparkContext, vertices, edges)
@@ -60,7 +60,7 @@ object PageRankSample {
 
     // since we want to have the ranks related to usernames instead of vertexIds,
     // we join the ranks with the user info (the vertices file) and then print
-    val users = Utils.loadVertices(sparkContext, verticesFilename)
+    val users = loadVertices(sparkContext, verticesFilename)
     val ranksByUsername = users
       .join(ranks)
       .map {

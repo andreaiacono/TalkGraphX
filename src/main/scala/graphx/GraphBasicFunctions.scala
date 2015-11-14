@@ -1,15 +1,12 @@
 package graphx
 
-import misc.Utils
+import org.apache.spark.SparkContext
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
-import org.apache.spark.SparkContext
 
-object GraphBasicFunctions {
+object GraphBasicFunctions extends App {
 
-  def main(args: Array[String]): Unit = {
-
-    val sparkContext = Utils.getSparkContext()
+    val sparkContext = getSparkContext()
 
     // create a very simple graph
     val graph = createSampleGraph(sparkContext)
@@ -19,26 +16,36 @@ object GraphBasicFunctions {
     println(s"The graph has ${graph.numEdges} edges")
 
     // prints the vertices of the graph
-    graph.vertices.foreach(vertex => println(s"VertexId: ${vertex._1} User: ${vertex._2}"))
+    for (vertex <- graph.vertices) {
+      println(s"VertexId: ${vertex.id} User: ${vertex.value}")
+    }
 
     // prints the edges of the graph
-    graph.edges.foreach(edge => println(s"Edge going from ${edge.srcId} to ${edge.dstId}"))
+    for (edge <- graph.edges) {
+      println(s"Edge going from ${edge.srcId} to ${edge.dstId}")
+    }
 
-    // prints the number of incoming edges for every vertex
-    graph.inDegrees.foreach(vertex => println(s"VertexId: ${vertex._1} Incoming edges: ${vertex._2}"))
+    for (vertex <- graph.inDegrees) {
+      println(s"VertexId: ${vertex.id} Incoming edges: ${vertex.value}")
+    }
 
-    // prints the number of outgoing edges for every vertex
-    graph.outDegrees.foreach(vertex => println(s"VertexId: ${vertex._1} Outgoing edges: ${vertex._2}"))
+    for (vertex <- graph.outDegrees) {
+      println(s"VertexId: ${vertex.id} Outgoing edges: ${vertex.value}")
+    }
 
-    // prints the number of all the edges of every vertex (both incoming and outgoing)
-    graph.degrees.foreach(vertex => println(s"VertexId: ${vertex._1} Degrees: ${vertex._2}"))
+    for (vertex <- graph.degrees) {
+      println(s"VertexId: ${vertex.id} Degrees: ${vertex.value}")
+    }
 
     // prints every triplet of the graph
-    graph.triplets.foreach(triplet => println(s"${triplet.srcAttr}[${triplet.srcId}] ${triplet.attr} ${triplet.dstAttr}[${triplet.dstId}]"))
+    for (triplet <- graph.triplets) {
+      println(s"${triplet.srcAttr}[${triplet.srcId}] ${triplet.attr} ${triplet.dstAttr}[${triplet.dstId}]")
+    }
 
     // prints the neighbours of every vertex as Arrays
-    graph.collectNeighbors(EdgeDirection.Either).foreach(vertex => println(s"Vertex [${vertex._1}] has neighbours: [${vertex._2.distinct.mkString(" ")}]"))
-  }
+    for (vertex <- graph.collectNeighbors(EdgeDirection.Either)) {
+      println(s"Vertex [${vertex.id}] has neighbours: [${vertex.value.distinct.mkString(" ")}]")
+    }
 
   /**
     * creates a Graph with hardcoded values of relationships among people
@@ -71,6 +78,5 @@ object GraphBasicFunctions {
 
     Graph(users, edges)
   }
-
 
 }

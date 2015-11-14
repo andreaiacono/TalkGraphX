@@ -1,7 +1,7 @@
 package graphx.builtin
 
+import graphx._
 import graphstream.SimpleGraphViewer
-import misc.{Constants, Utils}
 import org.apache.spark.graphx.Graph
 import org.apache.spark.graphx.lib.ConnectedComponents
 
@@ -15,20 +15,20 @@ object ConnectedComponentsSample {
 
   def main(args: Array[String]): Unit = {
 
-    val vertices = Constants.USERS_VERTICES_FILENAME
-    val edges = Constants.USERS_DISJOINT_EDGES_FILENAME
+    val vertices = USERS_VERTICES_FILENAME
+    val edges = USERS_DISJOINT_EDGES_FILENAME
 
     // launches the viewer of the graph
     new SimpleGraphViewer(vertices, edges, false).run();
 
     // loads a graph with vertices attributes [user, age] and edges not having any attribute
-    val sparkContext = Utils.getSparkContext()
-    val graph = Utils.loadGraphFromFiles(sparkContext, vertices, edges)
+    val sparkContext = getSparkContext()
+    val graph = loadGraphFromFiles(sparkContext, vertices, edges)
 
     run(graph)
   }
 
-  def run(graph: Graph[(String, Int), String]): Unit = {
+  def run(graph: Graph[Person, String]): Unit = {
 
     // calls the GraphX connected components algorithm on the graph
     val connectedComponents = ConnectedComponents.run(graph)

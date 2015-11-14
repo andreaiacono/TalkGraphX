@@ -1,6 +1,5 @@
 package graphstream;
 
-import misc.Constants;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -25,7 +24,7 @@ public class SimpleGraphViewer {
         graph = new MultiGraph("Relationships");
         graph.addAttribute("ui.quality");
         graph.addAttribute("ui.antialias");
-        graph.addAttribute("ui.stylesheet", "url('file:./" + Constants.CSS_FILENAME() + "')");
+        graph.addAttribute("ui.stylesheet", "url('file:./" + graphx.package$.MODULE$.CSS_FILENAME() + "')");
 
         // adds nodes and edges to the graph
         addDataFromFile(graph, verticesFilename, edgesFilename, isDirected);
