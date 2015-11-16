@@ -23,34 +23,45 @@ object PregelSample extends App {
 
     // we want to know the shortest paths from this vertex to all the others vertices
     // vertexId 1 is the city of Arad
-    val vertexSourceId: VertexId = 1L
+    val sourceCityId: VertexId = 1L
 
     // initialize the graph such that all vertices except the root have distance infinity
-    val initialGraph: Graph[(Double, List[VertexId]), Double] =
-      graph.mapVertices((id, _) =>
-        if (id == vertexSourceId)
-          (0.0, List[VertexId](vertexSourceId))
+    val initialGraph: Graph[VertexAttribute, Double] =
+      graph.mapVertices((vertexId, cityName) =>
+        if (vertexId == sourceCityId)
+          new VertexAttribute(
+            cityName,
+            0.0,
+            List[City](new City(cityName, sourceCityId))
+          )
         else
-          (Double.PositiveInfinity, List[VertexId]()))
+          new VertexAttribute(
+            cityName,
+            Double.PositiveInfinity,
+            List[City]())
+      )
 
     // step #1: define the initial message, max iterations and active direction
     val shortestPathFunction = initialGraph.pregel(
-      initialMsg = (Double.PositiveInfinity, List[VertexId]()),
+      initialMsg = new VertexAttribute("", Double.PositiveInfinity, List[City]()),
       maxIterations = Int.MaxValue,
-      activeDirection = EdgeDirection.Out) _
-
-    // step #2: define the vertex program, send message and merge message
-    val result = shortestPathFunction(
+      activeDirection = EdgeDirection.Out
+    ) (
 
       // vprog
       (vertexId, currentAttr, newAttr) =>
-        if (currentAttr.distance < newAttr.distance) currentAttr else newAttr,
+        if (currentAttr.distance <= newAttr.distance) currentAttr else newAttr,
 
       // sendMsg
       edgeTriplet => {
         if (edgeTriplet.srcAttr.distance < (edgeTriplet.dstAttr.distance - edgeTriplet.attr)) {
-          Iterator((edgeTriplet.dstId, (edgeTriplet.srcAttr.distance + edgeTriplet.attr, edgeTriplet.srcAttr.vertices :+ edgeTriplet.dstId)))
-        } else {
+          Iterator( (edgeTriplet.dstId, new VertexAttribute(
+                                              edgeTriplet.dstAttr.cityName,
+                                              edgeTriplet.srcAttr.distance + edgeTriplet.attr,
+                                              edgeTriplet.srcAttr.path :+ new City(edgeTriplet.dstAttr.cityName, edgeTriplet.dstId )))
+          )
+        }
+        else {
           Iterator.empty
         }
       },
@@ -60,8 +71,8 @@ object PregelSample extends App {
 
     )
 
-    for ((destVertexId, (distance, path)) <- result.vertices) {
-      println(s"Going from Vertex 1 to $destVertexId has a distance of $distance km. Path is ${path.mkString(", ")}")
+    for ((destVertexId, attribute) <- shortestPathFunction.vertices) {
+      println(s"Going from Arad to ${attribute.cityName} has a distance of ${attribute.distance} km. Path is: ${attribute.path.mkString(" => ")}")
     }
 
   }
