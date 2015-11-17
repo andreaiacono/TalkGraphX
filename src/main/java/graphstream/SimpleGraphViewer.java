@@ -1,5 +1,6 @@
 package graphstream;
 
+import graphx.package$;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -113,5 +114,10 @@ public class SimpleGraphViewer {
 
                 addedEdges.add(id.toString());
             });
+    }
+
+    public static void main(String[] args) throws Exception {
+        SimpleGraphViewer simpleGraphViewer = new SimpleGraphViewer(package$.MODULE$.USERS_VERTICES_FILENAME(), package$.MODULE$.LIKENESS_EDGES_FILENAME());
+        simpleGraphViewer.run();
     }
 }

@@ -1,6 +1,7 @@
 package graphx
 
 import graphstream.SimpleGraphViewer
+import graphx.types.VertexAttribute
 import org.apache.spark.SparkContext
 import org.apache.spark.graphx._
 
