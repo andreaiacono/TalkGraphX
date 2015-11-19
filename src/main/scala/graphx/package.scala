@@ -1,18 +1,12 @@
+import graphx.types.Person
 import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
-
-import scala.reflect.ClassTag
 
 package object graphx {
 
   type CityName = String
   type Distance = Double
-
-  implicit class PregelTuple(t: (Double, List[VertexId])) {
-    val distance = t._1
-    val vertices = t._2
-  }
 
   implicit class VertexIdTuple[A](t: (VertexId, A)) {
     val id: VertexId = t._1

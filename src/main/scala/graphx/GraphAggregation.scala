@@ -1,6 +1,7 @@
 package graphx
 
 import graphstream.SimpleGraphViewer
+import graphx.types.Person
 import org.apache.spark.graphx.{VertexRDD, Graph}
 
 object GraphAggregation {

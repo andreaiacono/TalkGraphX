@@ -1,4 +1,4 @@
-package graphx
+package graphx.types
 
 import org.apache.spark.graphx.VertexId
 

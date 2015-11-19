@@ -2,6 +2,7 @@ package graphx.builtin
 
 import graphstream.SimpleGraphViewer
 import graphx._
+import graphx.types.Person
 import org.apache.spark.graphx.Graph
 import org.apache.spark.graphx.lib.ShortestPaths
 
