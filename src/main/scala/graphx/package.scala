@@ -106,6 +106,8 @@ package object graphx {
   val EDGES_FILENAME = "src/main/resources/data/relationships_edges.txt"
   val CITIES_EDGES_FILENAME = "src/main/resources/data/cities_edges.txt"
   val CITIES_VERTICES_FILENAME = "src/main/resources/data/cities_vertices.txt"
+  val US_CITIES_EDGES_FILENAME = "src/main/resources/data/us_cities_edges.txt"
+  val US_CITIES_VERTICES_FILENAME = "src/main/resources/data/us_cities_vertices.txt"
   val LIKENESS_EDGES_FILENAME = "src/main/resources/data/likeness_edges.txt"
   val PAPERS_EDGES_FILENAME = "src/main/resources/data/papers_edges.txt"
   val USERS_EDGES_FILENAME = "src/main/resources/data/users_edges.txt"

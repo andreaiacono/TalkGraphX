@@ -6,15 +6,15 @@ import org.apache.spark.graphx._
 
 object PregelSample extends App {
 
-  val vertices = CITIES_VERTICES_FILENAME
-  val edges = CITIES_EDGES_FILENAME
+  val vertices = US_CITIES_VERTICES_FILENAME
+  val edges = US_CITIES_EDGES_FILENAME
 
   // launches the viewer of the graph
   new SimpleGraphViewer(vertices, edges, false).run()
 
   // loads the graph
   val sparkContext = getSparkContext()
-  val graph = loadCitiesGraphFromFiles(sparkContext, vertices, edges)
+  val graph: Graph[String, Double] = loadCitiesGraphFromFiles(sparkContext, vertices, edges)
 
   // launches pregel computation
   shortestPath(sparkContext, graph)
@@ -41,8 +41,8 @@ object PregelSample extends App {
             List[City]())
       )
 
-    // step #1: define the initial message, max iterations and active direction
-    val shortestPathFunction = initialGraph.pregel(
+    // applies the pregel computation to the graph
+    val shortestPathGraph = initialGraph.pregel(
       initialMsg = new VertexAttribute("", Double.PositiveInfinity, List[City]()),
       maxIterations = Int.MaxValue,
       activeDirection = EdgeDirection.Out
@@ -55,10 +55,14 @@ object PregelSample extends App {
       // sendMsg
       edgeTriplet => {
         if (edgeTriplet.srcAttr.distance < (edgeTriplet.dstAttr.distance - edgeTriplet.attr)) {
-          Iterator( (edgeTriplet.dstId, new VertexAttribute(
-                                              edgeTriplet.dstAttr.cityName,
-                                              edgeTriplet.srcAttr.distance + edgeTriplet.attr,
-                                              edgeTriplet.srcAttr.path :+ new City(edgeTriplet.dstAttr.cityName, edgeTriplet.dstId )))
+          Iterator(
+              ( edgeTriplet.dstId,
+                new VertexAttribute(
+                  edgeTriplet.dstAttr.cityName,
+                  edgeTriplet.srcAttr.distance + edgeTriplet.attr,
+                  edgeTriplet.srcAttr.path :+ new City(edgeTriplet.dstAttr.cityName, edgeTriplet.dstId )
+              )
+            )
           )
         }
         else {
@@ -67,12 +71,20 @@ object PregelSample extends App {
       },
 
       // mergeMsg
-      (city1, city2) => if (city1.distance < city2.distance) city1 else city2
+      (attribute1, attribute2) =>
+        if (attribute1.distance < attribute2.distance) {
+          attribute1
+        }
+        else {
+          attribute2
+        }
 
     )
 
-    for ((destVertexId, attribute) <- shortestPathFunction.vertices) {
-      println(s"Going from Arad to ${attribute.cityName} has a distance of ${attribute.distance} km. Path is: ${attribute.path.mkString(" => ")}")
+    for ((destVertexId, attribute) <- shortestPathGraph.vertices) {
+      println(s"Going from Washington to ${attribute.cityName} " +
+              s"has a distance of ${attribute.distance} km. " +
+              s"Path is: ${attribute.path.mkString(" => ")}")
     }
 
   }
