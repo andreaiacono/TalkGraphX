@@ -53,7 +53,7 @@ object PregelSample extends App {
       )
 
     // calls pregel
-    val shortestPathFunction = initialGraph.pregel(
+    val shortestPathGraph = initialGraph.pregel(
       initialMsg = VertexAttribute("", Double.PositiveInfinity, List[City]()),
       maxIterations = Int.MaxValue,
       activeDirection = EdgeDirection.Out
