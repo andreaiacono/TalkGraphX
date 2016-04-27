@@ -1,5 +1,5 @@
 # Talk GraphX
-This is the repository for the talk about GraphX given at the [Codemotion Milan](http://milan2015.codemotionworld.com/) conference in november 2015. Slides available here: [http://www.slideshare.net/andreaiacono/graphs-are-everywhere-distributed-graph-computing-with-spark-graphx](http://www.slideshare.net/andreaiacono/graphs-are-everywhere-distributed-graph-computing-with-spark-graphx)
+This is the repository for the talk about GraphX given at the [Codemotion Milan](http://milan2015.codemotionworld.com/) conference and at [Voxxed Ticino 2016](https://voxxeddays.com/ticino/). Slides not yet online.
 
 ## Requirements
 
