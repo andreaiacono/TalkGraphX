@@ -26,7 +26,7 @@ object ShortestPathSample {
 
     // loads a graph with vertices attributes [user, age] and edges having an attribute
     val sparkContext = getSparkContext()
-    val graph = loadGraphFromFiles(sparkContext, vertices, edges)
+    val graph = loadPersonFromFiles(sparkContext, vertices, edges)
 
     run(graph)
   }

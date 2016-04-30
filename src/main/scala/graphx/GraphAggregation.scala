@@ -16,7 +16,7 @@ object GraphAggregation {
 
     // loads the graph
     val sparkContext = getSparkContext()
-    val graph: Graph[Person, String] = loadGraphFromFiles(sparkContext, vertices, edges)
+    val graph: Graph[Person, String] = loadPersonFromFiles(sparkContext, vertices, edges)
 
     // computes the out degree of every vertex
     val outDegreeOfEveryVertex: VertexRDD[Int] =

@@ -45,13 +45,13 @@ package object graphx {
   }
 
   /**
-    * creates a Graph loading the nodes and the edges from filesystem
+    * creates a Graph of people loading the nodes and the edges from filesystem
     * @param sparkContext
     * @param edgesFilename
     * @param verticesFilename
     * @return
     */
-  def loadGraphFromFiles(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Graph[Person, String] = {
+  def loadPersonFromFiles(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Graph[Person, String] = {
 
     val edges = loadEdges(sparkContext, edgesFilename)
     val vertices = loadVertices(sparkContext, verticesFilename)
@@ -59,6 +59,13 @@ package object graphx {
     Graph(vertices, edges)
   }
 
+  /**
+    * creates a Graph of cities loading the nodes and the edges from filesystem
+    * @param sparkContext
+    * @param edgesFilename
+    * @param verticesFilename
+    * @return
+    */
   def loadCitiesGraphFromFiles(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Graph[CityName, Distance] = {
 
     val edges = sparkContext.textFile(edgesFilename)
@@ -72,6 +79,30 @@ package object graphx {
       .map { line =>
               val fields = line.split(" ")
               (fields(0).toLong, (fields(1)))
+      }
+
+    Graph(vertices, edges)
+  }
+  /**
+    * creates a Graph of values loading the nodes and the edges from filesystem
+    * @param sparkContext
+    * @param edgesFilename
+    * @param verticesFilename
+    * @return
+    */
+  def loadValuesGraphFromFiles(sparkContext: SparkContext, verticesFilename: String, edgesFilename: String): Graph[Int, Int] = {
+
+    val edges = sparkContext.textFile(edgesFilename)
+      .map { line =>
+              val fields = line.split(" ")
+              Edge(fields(0).toLong, fields(1).toLong, 0)
+      }
+
+    val vertices = sparkContext.textFile(verticesFilename)
+      .filter( line => line.length > 0 && line.charAt(0) != '#')
+      .map { line =>
+              val fields = line.split(" ")
+              (fields(0).toLong, (fields(1).toInt))
       }
 
     Graph(vertices, edges)
@@ -102,6 +133,8 @@ package object graphx {
   val CITIES_VERTICES_FILENAME = "src/main/resources/data/cities_vertices.txt"
   val US_CITIES_EDGES_FILENAME = "src/main/resources/data/us_cities_edges.txt"
   val US_CITIES_VERTICES_FILENAME = "src/main/resources/data/us_cities_vertices.txt"
+  val MAXVALUE_EDGES_FILENAME = "src/main/resources/data/maxvalue_edges.txt"
+  val MAXVALUE_VERTICES_FILENAME = "src/main/resources/data/maxvalue_vertices.txt"
   val LIKENESS_EDGES_FILENAME = "src/main/resources/data/likeness_edges.txt"
   val PAPERS_EDGES_FILENAME = "src/main/resources/data/papers_edges.txt"
   val USERS_EDGES_FILENAME = "src/main/resources/data/users_edges.txt"
